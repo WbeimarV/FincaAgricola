@@ -9,37 +9,21 @@ CREATE TABLE producto (
     precio_unitario DECIMAL(10,2)
 );
 
-CREATE TABLE cultivo (
-    id_cultivo INT AUTO_INCREMENT PRIMARY KEY,
-    id_producto INT NOT NULL,
-    fecha_siembra DATE,
-    fecha_cosecha_estimada DATE,
-    FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
-);
-
-CREATE TABLE produccion (
-    id_produccion INT AUTO_INCREMENT PRIMARY KEY,
-    id_producto INT NOT NULL,
-    cantidad_producida DECIMAL(10,2),
-    fecha DATE,
-    observaciones TEXT,
-    FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
-);
-
-CREATE TABLE inventario (
-    id_inventario INT AUTO_INCREMENT PRIMARY KEY,
-    id_producto INT NOT NULL,
-    cantidad_actual DECIMAL(10,2),
-    fecha_ultima_actualizacion DATE,
-    FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
-);
-
 CREATE TABLE cliente (
     id_cliente INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100),
     telefono VARCHAR(20),
     correo VARCHAR(100),
     direccion VARCHAR(150)
+);
+
+CREATE TABLE proveedor (
+    id_proveedor INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100),
+    telefono VARCHAR(20),
+    correo VARCHAR(100),
+    direccion VARCHAR(150),
+    tipo_producto VARCHAR(50)
 );
 
 CREATE TABLE empleado (
@@ -49,6 +33,16 @@ CREATE TABLE empleado (
     fecha_contratacion DATE,
     salario DECIMAL(10,2),
     estado VARCHAR(20)
+);
+
+CREATE TABLE compra (
+    id_compra INT AUTO_INCREMENT PRIMARY KEY,
+    id_proveedor INT NOT NULL,
+    id_empleado INT NOT NULL,
+    fecha_compra DATE,
+    total DECIMAL(10,2),
+    FOREIGN KEY (id_proveedor) REFERENCES proveedor(id_proveedor),
+    FOREIGN KEY (id_empleado) REFERENCES empleado(id_empleado)
 );
 
 CREATE TABLE venta (
@@ -61,34 +55,41 @@ CREATE TABLE venta (
     FOREIGN KEY (id_empleado) REFERENCES empleado(id_empleado)
 );
 
-CREATE TABLE detalle_venta (
-    id_detalle INT AUTO_INCREMENT PRIMARY KEY,
-    id_venta INT NOT NULL,
+CREATE TABLE maquinaria (
+    id_maquinaria INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100),
+    tipo VARCHAR(50),
+    fecha_adquisicion DATE,
+    estado VARCHAR(50),
+    id_empleado INT,
+    id_compra INT,
+    FOREIGN KEY (id_empleado) REFERENCES empleado(id_empleado),
+    FOREIGN KEY (id_compra) REFERENCES compra(id_compra)
+);
+
+CREATE TABLE cultivo (
+    id_cultivo INT AUTO_INCREMENT PRIMARY KEY,
     id_producto INT NOT NULL,
-    cantidad DECIMAL(10,2),
-    precio_unitario DECIMAL(10,2),
-    subtotal DECIMAL(10,2),
-    FOREIGN KEY (id_venta) REFERENCES venta(id_venta),
+    fecha_siembra DATE,
+    fecha_cosecha_estimada DATE,
     FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
 );
 
-CREATE TABLE proveedor (
-    id_proveedor INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100),
-    telefono VARCHAR(20),
-    correo VARCHAR(100),
-    direccion VARCHAR(150),
-    tipo_producto VARCHAR(50)
+CREATE TABLE inventario (
+    id_inventario INT AUTO_INCREMENT PRIMARY KEY,
+    id_producto INT NOT NULL,
+    cantidad_actual DECIMAL(10,2),
+    fecha_ultima_actualizacion DATE,
+    FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
 );
 
-CREATE TABLE compra (
-    id_compra INT AUTO_INCREMENT PRIMARY KEY,
-    id_proveedor INT NOT NULL,
-    id_empleado INT NOT NULL,
-    fecha_compra DATE,
-    total DECIMAL(10,2),
-    FOREIGN KEY (id_proveedor) REFERENCES proveedor(id_proveedor),
-    FOREIGN KEY (id_empleado) REFERENCES empleado(id_empleado)
+CREATE TABLE produccion (
+    id_produccion INT AUTO_INCREMENT PRIMARY KEY,
+    id_producto INT NOT NULL,
+    cantidad_producida DECIMAL(10,2),
+    fecha DATE,
+    observaciones TEXT,
+    FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
 );
 
 CREATE TABLE detalle_compra (
@@ -102,23 +103,15 @@ CREATE TABLE detalle_compra (
     FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
 );
 
-CREATE TABLE asistencia_empleado (
-    id_asistencia INT AUTO_INCREMENT PRIMARY KEY,
-    id_empleado INT NOT NULL,
-    fecha DATE,
-    hora_entrada TIME,
-    hora_salida TIME,
-    FOREIGN KEY (id_empleado) REFERENCES empleado(id_empleado)
-);
-
-CREATE TABLE maquinaria (
-    id_maquinaria INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100),
-    tipo VARCHAR(50),
-    fecha_adquisicion DATE,
-    estado VARCHAR(50),
-    id_empleado INT,
-    FOREIGN KEY (id_empleado) REFERENCES empleado(id_empleado)
+CREATE TABLE detalle_venta (
+    id_detalle INT AUTO_INCREMENT PRIMARY KEY,
+    id_venta INT NOT NULL,
+    id_producto INT NOT NULL,
+    cantidad DECIMAL(10,2),
+    precio_unitario DECIMAL(10,2),
+    subtotal DECIMAL(10,2),
+    FOREIGN KEY (id_venta) REFERENCES venta(id_venta),
+    FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
 );
 
 CREATE TABLE mantenimiento_maquinaria (
@@ -140,4 +133,13 @@ CREATE TABLE actividad_maquinaria (
     fecha_inicio DATE,
     fecha_fin DATE,
     FOREIGN KEY (id_maquinaria) REFERENCES maquinaria(id_maquinaria)
+);
+
+CREATE TABLE asistencia_empleado (
+    id_asistencia INT AUTO_INCREMENT PRIMARY KEY,
+    id_empleado INT NOT NULL,
+    fecha DATE,
+    hora_entrada TIME,
+    hora_salida TIME,
+    FOREIGN KEY (id_empleado) REFERENCES empleado(id_empleado)
 );
