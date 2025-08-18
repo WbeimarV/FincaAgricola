@@ -51,12 +51,6 @@ FROM produccion pr
 JOIN producto p ON pr.id_producto = p.id_producto
 GROUP BY p.nombre;
 
--- 10. Ver la producción total acumulada por producto (nombre del producto y suma de la cantidad producida)
-SELECT p.nombre, SUM(pr.cantidad_producida) AS total_producido
-FROM produccion pr
-JOIN producto p ON pr.id_producto = p.id_producto
-GROUP BY p.nombre;
-
 -- 11. Obtener todas las ventas realizadas por un empleado
 SELECT v.id_venta, c.nombre AS cliente, v.total, v.fecha_venta
 FROM venta v
