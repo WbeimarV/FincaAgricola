@@ -33,12 +33,201 @@ El modelo incluye, entre otras, las siguientes entidades:
 9. Clientes: Datos de compradores y distribuidores.
 
 ## Funcionalidades Clave
-- Consultar producción por producto y periodo.
-- Control de stock y alerta por niveles mínimos.
-- Reporte de ventas por cliente y por producto.
-- Seguimiento de compras y gastos.
+- Consultar producción.
+- Control de stock.
+- Reporte de ventas.
+- Seguimiento de compras.
 - Registro y control de mantenimiento de maquinaria.
 - Administración de recursos humanos (empleados, roles, asignaciones).
 
 ## Instrucciones de Uso
-1. Clonar el repositorio o descargar el proyecto.
+
+### Requisitos del Sistema
+
+Para ejecutar correctamente este proyecto, asegúrate de contar con:
+
+- **Sistema Operativo**: Windows, Linux o macOS
+- **MySQL Server**: Versión **8.0 o superior**
+- **Cliente de base de datos**:
+  - [MySQL Workbench](https://dev.mysql.com/downloads/workbench/) (recomendado)
+  - [DBeaver](https://dbeaver.io/)
+  - Terminal `mysql`
+- **Espacio en disco**: al menos 100 MB disponibles
+- **Editor de texto opcional**: Visual Studio Code o similar para editar archivos `.sql`
+
+### ⚙️ Instalación y Configuración
+
+#### 1. Clona o descarga el proyecto
+
+### 2. Inicia el servidor MySQL
+
+Asegúrate de que el servidor de MySQL esté en ejecución antes de continuar.
+
+### 3. Ejecuta el archivo ddl.sql
+
+Este archivo contiene la definición de toda la estructura de la base de datos (tablas y relaciones).
+
+Opción A: Desde MySQL Workbench
+
+Abre el archivo ddl.sql
+
+Ejecuta el script completo
+
+Verifica que todas las tablas se hayan creado
+
+### 4. Ejecuta el archivo dml.sql
+
+Este script inserta todos los datos necesarios para comenzar a probar el sistema (productos, empleados, clientes, ventas, etc.).
+
+## Consultas SQL
+
+Las consultas SQL son instrucciones utilizadas para recuperar, filtrar y analizar la información almacenada en la base de datos. A través de ellas, es posible:
+
+- Obtener listados de productos, clientes, empleados, etc.
+- Consultar ventas o compras en un rango de fechas
+- Verificar el estado del inventario
+- Generar reportes personalizados con filtros y condiciones
+- Realizar análisis agregados como totales, promedios y agrupaciones
+
+A continuación se presentan algunos ejemplos prácticos que puedes ejecutar directamente. Solo debes ejecutar el bloque de código.
+```
+-- Mostrar todos los productos disponibles con su tipo, unidad y precio unitario
+
+SELECT nombre, tipo_producto, unidad_medida, precio_unitario
+FROM producto;
+```
+```
+-- Consultar los detalles de una venta especifica
+
+SELECT dv.id_detalle, p.nombre AS producto, dv.cantidad, dv.precio_unitario, dv.subtotal
+FROM detalle_venta dv
+JOIN producto p ON dv.id_producto = p.id_producto
+WHERE dv.id_venta = 6;
+```
+```
+-- Consultar los clientes que han realizado más de 2 compras
+
+SELECT c.id_cliente, c.nombre, COUNT(v.id_venta) AS cantidad_ventas
+FROM venta v
+JOIN cliente c ON v.id_cliente = c.id_cliente
+GROUP BY c.id_cliente, c.nombre
+HAVING cantidad_ventas > 2;
+```
+
+Para más consultas puedes revisar el documento dql_select.sql en la cual se disponen hasta 50 consultas.
+
+## Procedimientos Almacenados
+
+A continuación se presentan ejemplos de cómo se pueden utilizar y probar los procedimientos incluidos en este sistema.
+
+### Ejemplo 1: ajustar_salario_empleado
+```
+-- Este procedimiento permite aumentar o reducir el salario de un empleado en un porcentaje dado.
+
+DELIMITER // 
+CREATE PROCEDURE ajustar_salario_empleado (
+    IN emp_id INT,
+    IN porcentaje DECIMAL(5,2)
+)
+BEGIN
+    UPDATE empleado
+    SET salario = salario + (salario * porcentaje / 100)
+    WHERE id_empleado = emp_id;
+END//
+DELIMITER ;
+```
+
+Para ver su funcionamiento se recomienda seguir estos pasos:
+1. Ver salario actual del empleado (ID 5)
+```
+SELECT id_empleado, nombre, salario
+FROM empleado
+WHERE id_empleado = 5;
+```
+
+2. Llamar el procedimiento aumentando el salario 10%
+```
+CALL ajustar_salario_empleado(5, 10);
+```
+
+3. Verificar nuevo salario
+```
+SELECT id_empleado, nombre, salario
+FROM empleado
+WHERE id_empleado = 5;
+```
+
+### Ejemplo 2: actualizar_estado_maquinaria
+```
+-- Este procedimiento cambia el estado de una maquinaria dada
+
+DELIMITER //
+CREATE PROCEDURE actualizar_estado_maquinaria (
+    IN maq_id INT,
+    IN nuevo_estado VARCHAR(50)
+)
+BEGIN
+    UPDATE maquinaria
+    SET estado = nuevo_estado
+    WHERE id_maquinaria = maq_id;
+END//
+DELIMITER ;
+```
+
+Para ver su funcionamiento se recomienda seguir estos pasos: 
+1. Ver estado actual de la maquinaria (ID 8):
+```
+SELECT id_maquinaria, nombre, estado
+FROM maquinaria
+WHERE id_maquinaria = 8;
+```
+
+2. Cambiar estado a "En reparación":
+```
+CALL actualizar_estado_maquinaria(8, 'En reparación');
+```
+
+3. Verificar nuevo estado:
+```
+SELECT id_maquinaria, nombre, estado
+FROM maquinaria
+WHERE id_maquinaria = 7;
+```
+
+### Ejemplo 3: registrar_detalle_compra
+```
+-- Este procedimiento registra una nueva fila en detalle_compra, calculando el subtotal automáticamente.
+DELIMITER //
+CREATE PROCEDURE registrar_detalle_compra (
+    IN compra_id INT,
+    IN producto_id INT,
+    IN cantidad DECIMAL(10,2),
+    IN precio_unitario DECIMAL(10,2)
+)
+BEGIN
+    INSERT INTO detalle_compra (id_compra, id_producto, cantidad, precio_unitario, subtotal)
+    VALUES (compra_id, producto_id, cantidad, precio_unitario, cantidad * precio_unitario);
+END//
+DELIMITER ;
+```
+Para verificar su funcionamiento siga estos pasos
+
+1. Ver detalles actuales de la compra (ID 3):
+```
+SELECT id_detalle, id_producto, cantidad, precio_unitario, subtotal
+FROM detalle_compra
+WHERE id_compra = 3;
+```
+
+2. Registrar nuevo detalle:
+```
+CALL registrar_detalle_compra(3, 10, 5, 3000);
+```
+
+3. Verificar nuevo detalle agregado:
+```
+SELECT id_detalle, id_producto, cantidad, precio_unitario, subtotal
+FROM detalle_compra
+WHERE id_compra = 3;
+```
+Para más consultas puedes revisar el documento dql_procedimientos.sql
