@@ -277,4 +277,5 @@ BEGIN
     SET id_empleado = p_nuevo_empleado
     WHERE id_maquinaria = p_id_maquinaria;
 END$$
+
 DELIMITER ;
