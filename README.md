@@ -114,7 +114,7 @@ GROUP BY c.id_cliente, c.nombre
 HAVING cantidad_ventas > 2;
 ```
 
-Para más consultas puedes revisar el documento dql_select.sql en la cual se disponen hasta 50 consultas.
+[Para más consultas puedes revisar este documento](dql_select.sql)
 
 ## Procedimientos Almacenados
 
@@ -230,4 +230,90 @@ SELECT id_detalle, id_producto, cantidad, precio_unitario, subtotal
 FROM detalle_compra
 WHERE id_compra = 3;
 ```
-Para más consultas puedes revisar el documento dql_procedimientos.sql
+[Para más procedimientos puedes revisar el documento](dql_procedimientos.sql)
+
+## Funciones
+A continuación se muestran tres ejemplos completos de funciones SQL implementadas en el sistema de gestión de la finca agrícola, incluyendo cómo crearlas y cómo probar su funcionamiento en distintos contextos.
+
+### Ejemplo 1: calcular_total_detalle_venta 
+
+```
+-- Calcula el subtotal de un detalle de venta (cantidad × precio unitario).
+
+DELIMITER $$
+
+CREATE FUNCTION calcular_total_detalle_venta(
+    cantidad DECIMAL(10,2),
+    precio_unitario DECIMAL(10,2)
+)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    RETURN cantidad * precio_unitario;
+END$$
+
+DELIMITER ;
+
+```
+1. Se prueba la función 
+```
+SELECT calcular_total_detalle_venta(12, 1800);
+```
+### Ejemplo 2: obtener_nombre_producto
+```
+-- Retorna el nombre de un producto dado su ID.
+
+DELIMITER $$
+
+CREATE FUNCTION obtener_nombre_producto(id_producto INT)
+RETURNS VARCHAR(100)
+DETERMINISTIC
+BEGIN
+    DECLARE nombre_resultado VARCHAR(100);
+    SELECT nombre INTO nombre_resultado
+    FROM producto
+    WHERE producto.id_producto = id_producto;
+    RETURN nombre_resultado;
+END$$
+
+DELIMITER ;
+```
+1. Verifica que exista un producto con ID 5
+```
+SELECT * FROM producto WHERE id_producto = 5;
+```
+
+2. Llama la función
+```
+SELECT obtener_nombre_producto(5);
+```
+
+### Ejemplo 3: calcular_total_compra
+```
+-- Calcula el total de una compra sumando los subtotales de sus detalles.
+
+DELIMITER $$
+
+CREATE FUNCTION calcular_total_compra(id_compra INT)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE total_resultado DECIMAL(10,2);
+    SELECT SUM(subtotal) INTO total_resultado
+    FROM detalle_compra
+    WHERE detalle_compra.id_compra = id_compra;
+    RETURN total_resultado;
+END$$
+
+DELIMITER ;
+```
+
+1. Verifica detalles de compra con ID 4
+```
+SELECT * FROM detalle_compra WHERE id_compra = 4;
+```
+
+2. Llama la función
+```
+SELECT calcular_total_compra(4);
+``` 
