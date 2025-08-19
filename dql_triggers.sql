@@ -1,6 +1,6 @@
 use finca_agricola_wbeimar;
 
--- actualizar venta al registrar un detalle de venta
+-- 1. actualizar venta al registrar un detalle de venta
 DELIMITER $$
 CREATE TRIGGER actualizar_total_venta
 AFTER INSERT ON detalle_venta
@@ -16,7 +16,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- Actualizar inventario al registrar un detalle de venta
+-- 2. Actualizar inventario al registrar un detalle de venta
 DELIMITER $$
 CREATE TRIGGER trg_disminuir_inventario_venta
 AFTER INSERT ON detalle_venta
@@ -29,7 +29,7 @@ BEGIN
 END $$
 DELIMITER ;
 
--- actualiza o inserta en inventario cuando hay producción
+-- 3. Actualiza o inserta en inventario cuando hay producción
 DELIMITER $$
 CREATE TRIGGER actualizar_inventario_despues_produccion
 AFTER INSERT ON produccion
@@ -56,7 +56,7 @@ BEGIN
 END;$$
 DELIMITER ;
 
--- actualizar una compra al registrar un detalle de compra
+-- 4. Actualizar una compra al registrar un detalle de compra
 DELIMITER $$
 CREATE TRIGGER actualizar_total_compra
 AFTER INSERT ON detalle_compra
@@ -72,7 +72,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- actualizar o insertar en inventario despues de registrar un detalle de compra
+-- 5. Actualizar o insertar en inventario despues de registrar un detalle de compra
 DELIMITER $$
 CREATE TRIGGER actualizar_inventario_despues_compra
 AFTER INSERT ON detalle_compra
@@ -99,7 +99,7 @@ BEGIN
 END;$$
 DELIMITER ;
 
--- verificar stock para vender
+-- 6. Verificar stock para vender
 DELIMITER $$
 CREATE TRIGGER verificar_stock_antes_venta
 BEFORE INSERT ON detalle_venta
@@ -131,7 +131,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- actualizar estado maquina cuando entra a mantenimiento
+-- 7. Actualizar estado maquina cuando entra a mantenimiento
 DELIMITER $$
 CREATE TRIGGER actualizar_estado_maquinaria_por_mantenimiento
 AFTER INSERT ON mantenimiento_maquinaria
@@ -143,7 +143,7 @@ BEGIN
 END$$
 DELIMITER ;
 
--- actualizar estado maquina segun fecha fucionamiento
+-- 8. Actualizar estado maquina segun fecha fucionamiento
 DELIMITER $$
 CREATE TRIGGER actualizar_estado_maquinaria_funcionamiento
 AFTER INSERT ON actividad_maquinaria
@@ -161,7 +161,7 @@ END$$
 DELIMITER ;
 
 
--- impedir ventas de empleado inactivo
+-- 9. Impedir ventas de empleado inactivo
 DELIMITER $$
 CREATE TRIGGER bloquear_venta_empleado_inactivo
 BEFORE INSERT ON venta

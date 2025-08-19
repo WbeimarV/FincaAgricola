@@ -317,3 +317,71 @@ SELECT * FROM detalle_compra WHERE id_compra = 4;
 ```
 SELECT calcular_total_compra(4);
 ``` 
+
+[Para más funciones puedes revisar el documento](dql_funciones.sql.sql)
+
+## Triggers 
+
+A continuación se dan detalles para el uso correcto de los triggers. Estos se pueden encontrar [en este documento.](dql_triggers.sql). Ejecute previamente el trigger encontrado en el documento, para su  verificación siga los pasos que encuentra a continuación.
+
+### Trigger 1: actualizar_total_venta
+Actualiza automáticamente el campo total en la tabla venta cuando se inserta un nuevo detalle_venta.
+```
+-- 1. verifique el total una venta con un id válido
+SELECT * FROM venta WHERE id_venta = 1;
+
+-- 2. Insertar un detalle de venta (esto dispara el trigger) teniendo en cuenta el mismo id
+INSERT INTO detalle_venta (id_venta, id_producto, cantidad, precio_unitario, subtotal)
+VALUES (1, 1, 2, 1500, 3000);
+
+-- 3. Verificar que el total se actualizó automáticamente
+SELECT * FROM venta WHERE id_venta = 1;
+```
+
+### Trigger 2: trg_disminuir_inventario_venta
+Disminuye la cantidad de producto en inventario tras registrar un detalle de venta.
+```
+-- 1. Verificar stock actual del producto (ej: id_producto = 1)
+SELECT * FROM inventario WHERE id_producto = 1;
+
+-- 2. Insertar un nuevo detalle de venta (esto disminuirá el inventario)
+INSERT INTO detalle_venta (id_venta, id_producto, cantidad, precio_unitario, subtotal)
+VALUES (1, 1, 3, 1500, 4500);
+
+-- 3. Consultar nuevamente el inventario para ver la reducción
+SELECT * FROM inventario WHERE id_producto = 1;
+```
+
+### Trigger 3: actualizar_inventario_despues_produccion
+
+Actualiza o crea una entrada en el inventario cuando se registra producción.
+```
+-- 1. Verificar si el producto ya está en inventario
+SELECT * FROM inventario WHERE id_producto = 2;
+
+-- 2. Insertar producción de ese producto (esto actualiza o crea inventario)
+INSERT INTO produccion (id_producto, cantidad_producida, fecha)
+VALUES (2, 100, CURDATE());
+
+-- 3. Verificar que el inventario se haya actualizado o creado
+SELECT * FROM inventario WHERE id_producto = 2;
+```
+
+### Trigger 4: actualizar_total_compra
+
+Actualiza el total de una compra automáticamente al insertar un detalle de compra.
+```
+-- 1. Verificar una compra válida 
+SELECT * FROM compra WHERE id_compra = 1;
+
+-- 2. Verificamos los subtotales de esta compra
+select * from detalle_compra where id_compra=1;
+
+-- 3. Insertamos un detalle de compra
+INSERT INTO detalle_compra (id_compra, id_producto, cantidad, precio_unitario, subtotal)
+VALUES (1, 1, 10, 100000.33, 10*100000.33);
+
+-- 4. Verificamos que el total se actualizó automáticamente
+SELECT * FROM compra WHERE id_compra = 1;
+```
+
