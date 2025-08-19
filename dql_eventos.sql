@@ -1,4 +1,4 @@
--- Inserta una marca con NULL en horas para los que no tienen asistencia ese día
+-- 1. Inserta una marca con NULL en horas para los que no tienen asistencia ese día
 CREATE EVENT registrar_asistencia_faltante
 ON SCHEDULE EVERY 1 DAY
 DO
@@ -9,7 +9,7 @@ WHERE id_empleado NOT IN (
     SELECT id_empleado FROM asistencia_empleado WHERE fecha = CURDATE()
 );
 
--- eliminar asistencias con horas incompletas mayores a 7 días
+-- 2. Eliminar asistencias con horas incompletas mayores a 7 días
 CREATE EVENT limpiar_asistencias_incompletas
 ON SCHEDULE EVERY 1 WEEK
 DO
@@ -17,7 +17,7 @@ DELETE FROM asistencia_empleado
 WHERE (hora_entrada IS NULL OR hora_salida IS NULL)
 AND fecha < CURDATE() - INTERVAL 7 DAY;
 
--- marcar maquinaria sin actividad reciente como 'Inactiva'
+-- 3. Marcar maquinaria sin actividad reciente como 'Inactiva'
 CREATE EVENT actualizar_estado_maquinaria_inactiva
 ON SCHEDULE EVERY 1 MONTH
 DO
@@ -29,7 +29,7 @@ WHERE id_maquinaria NOT IN (
     WHERE fecha_fin >= CURDATE() - INTERVAL 30 DAY
 );
 
--- verificar maquinaria en mantenimiento por más de 15 días 
+-- 4. Verificar maquinaria en mantenimiento por más de 15 días 
 CREATE EVENT verificar_mantenimientos_largos
 ON SCHEDULE EVERY 1 DAY
 DO
@@ -41,7 +41,7 @@ WHERE id_maquinaria IN (
     WHERE fecha <= CURDATE() - INTERVAL 15 DAY
 );
 
--- Eliminar ventas sin detalles pasadas más de 2 días
+--  5. Eliminar ventas sin detalles pasadas más de 2 días
 CREATE EVENT limpiar_ventas_incompletas
 ON SCHEDULE EVERY 1 DAY
 DO

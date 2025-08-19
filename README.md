@@ -385,3 +385,72 @@ VALUES (1, 1, 10, 100000.33, 10*100000.33);
 SELECT * FROM compra WHERE id_compra = 1;
 ```
 
+## Eventos
+A continuación se dan detalles para el uso correcto de los eventos. Estos se pueden encontrar [en este documento.](dql_eventos.sql). Ejecute previamente el trigger encontrado en el documento, para su  verificación siga los pasos que encuentra a continuación.
+
+### Evento 1: registrar_asistencia_faltante
+Inserta registros de asistencia con NULL en horas para empleados que no marcaron ese día.
+```
+-- 1. Verificar asistencia antes
+SELECT * FROM asistencia_empleado WHERE fecha = CURDATE();
+
+-- 2. Simular el dia actual marcado para un empleado
+INSERT INTO asistencia_empleado (id_empleado, fecha, hora_entrada, hora_salida) VALUES
+(1, curdate(), '07:10:00', '16:00:00');
+
+-- 3. Ejecutar el primer evento del documento "dql_eventos.sql"
+
+-- 4. Verificar que se registró la asistencia con NULL
+SELECT * FROM asistencia_empleado WHERE fecha = CURDATE();
+```
+
+### Evento 2: limpiar_asistencias_incompletas
+
+Elimina registros de asistencia con horas incompletas que tengan más de 7 días.
+```
+-- Insertar una asistencia incompleta hace más de 7 días
+INSERT INTO asistencia_empleado (id_empleado, fecha, hora_entrada, hora_salida)
+VALUES (1, CURDATE() - INTERVAL 10 DAY, '08:00:00', NULL);
+
+-- Verificar antes
+SELECT * FROM asistencia_empleado
+WHERE fecha < CURDATE() - INTERVAL 7 DAY;
+
+-- Ejecutar el segundo evento del documento "dql_eventos.sql"
+
+-- Verificar después
+SELECT * FROM asistencia_empleado
+WHERE fecha < CURDATE() - INTERVAL 7 DAY;
+```
+
+### Evento 3: actualizar_estado_maquinaria_inactiva
+
+Descripción: Marca como 'Inactiva' las maquinarias sin actividad en los últimos 30 días.
+```
+-- Verificar estado actual
+SELECT id_maquinaria, estado FROM maquinaria;
+
+-- Asegurarse de que una máquina no tenga actividad reciente
+-- (por ejemplo, eliminar actividades de la maquinaria 3)
+DELETE FROM actividad_maquinaria
+WHERE id_maquinaria = 3 AND fecha_fin >= CURDATE() - INTERVAL 30 DAY;
+
+-- Ejecutar el tercer evento del documento "dql_eventos.sql"UPDATE maquinaria
+
+-- Verificar el cambio
+SELECT id_maquinaria, estado FROM maquinaria WHERE id_maquinaria = 3;
+```
+
+## Conclusión
+
+Este proyecto implementa un sistema de gestión para una finca agrícola, incluyendo:
+
+Consultas SQL  para análisis y gestión de datos.
+
+Procedimientos y funciones almacenadas que automatizan operaciones comunes.
+
+Triggers que garantizan la consistencia e integridad automática de los datos.
+
+Eventos que programan tareas repetitivas para mantener el sistema actualizado.
+
+La estructura modular y funcional permite escalar o adaptar fácilmente el sistema según las necesidades de cualquier entorno agrícola digitalizado.
